@@ -2,12 +2,52 @@ package Main;
 import java.io.OutputStream;
 import java.util.Scanner;
 import Absyn.*;
+import Frag.*;
 import Parse.*;
+import RegAlloc.RegAlloc;
 import Semant.*;
+import Frame.*;
+import Mips.*;
 
 public class Main{
 	public static void main(String[] argv) throws java.io.IOException 
 	{
+		String filename = argv[0];
+		ErrorMsg.ErrorMsg errorMsg = new ErrorMsg.ErrorMsg(filename);  
+		java.io.FileInputStream inp = new java.io.FileInputStream(filename); 
+		System.out.println("\n\n\n");
+		
+		Parse parse = new Parse(filename);
+		//Yylex 执行词法分析
+		//Grm 执行语法分析
+		Grm parser = new Grm(new Yylex(inp, errorMsg), errorMsg);
+	    try 
+	    {
+	    	parser.parse();  
+	    }
+	    catch (Exception e) 
+	    {
+	    	e.printStackTrace();
+		}
+	   
+	    Print printAbstree = new Print(System.out);  
+	    Exp absyn = parser.parseResult;
+	    printAbstree.prExp(absyn, 0); 
+	    System.out.println("\n\n\n");
+	    
+	    //
+	    Frame frame = new MipsFrame();
+	    Translate.Translate translator = new Translate.Translate(frame);
+	    Semant semant = new Semant(translator, errorMsg);
+	    Frag frags = semant.transProg(absyn);
+	    
+	    System.out.println(".global main");
+	    for (Frag f = frags; f != null; f = f.next)
+	    	if (f instanceof ProcFrag)
+	    	emitProc((ProcFrag) f);
+	    	else if (f instanceof DataFrag)
+	    	System.out.println(".data\n" + ((DataFrag) f).data);
+		/*
 		String filename = argv[0];
 		ErrorMsg.ErrorMsg errorMsg = new ErrorMsg.ErrorMsg(filename);  
 		java.io.FileInputStream inp = new java.io.FileInputStream(filename); 
@@ -84,6 +124,35 @@ public class Main{
 	        		IRPrint.prStm(ss.head);
 	        }
 	    }
-	    
+	    */
+	}
+	
+	//根据函数段输出该函数段的 IR 树和汇编指令
+	static void emitProc(ProcFrag f) {
+		java.io.PrintStream irOut = new java.io.PrintStream(System.out);
+		//输出 IR 树
+		Tree.Print print = new Tree.Print(irOut);
+		irOut.println("function " + f.frame.name);
+		print.prStm(f.body);
+		//规范化
+		//IR 树被写成一个没有 SEQ 和 ESEQ 结点的规范树表
+		Tree.StmList stms = Canon.Canon.linearize(f.body);
+		//根据该表划分基本块,每个基本块中不包含内部跳转和标号
+		Canon.BasicBlocks b = new Canon.BasicBlocks(stms);
+		//基本块被顺序放置,所有的 CJUMP 都跟有 false 标号
+		Tree.StmList traced = (new Canon.TraceSchedule(b)).stms;//////
+		//生成汇编代码
+		Assem.InstrList instrs = f.frame.codegen(traced.head);
+		instrs = f.frame.procEntryExit2(instrs);
+		//寄存器分配
+		//这一步具体 3 步见 9.6
+		RegAlloc regAlloc = new RegAlloc(f.frame, instrs);
+		//添加函数调用和返回的代码
+		instrs = f.frame.procEntryExit3(instrs);
+		Temp.TempMap tempmap = new Temp.CombineMap(f.frame, regAlloc);
+		//输出 Mips 指令
+		System.out.println(".text");
+		for (Assem.InstrList p = instrs; p != null; p = p.tail)
+		System.out.println(p.head.format(tempmap));
 	}
 }
