@@ -3,7 +3,15 @@ package Temp;
 public class TempList {
    public Temp head;
    public TempList tail;
-   public TempList(Temp h, TempList t) {head=h; tail=t;}
+   public TempList(Temp h, TempList t)
+   {
+	   if (t == null){
+		   head=h; tail=null;
+	   }
+	   else{
+		   head=h; tail=t;
+	   } 
+   }
    public TempList() 
    {
 	   head=null; tail=null;

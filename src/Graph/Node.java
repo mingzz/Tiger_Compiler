@@ -2,7 +2,7 @@ package Graph;
 
 public class Node {
 
-    Graph mygraph;
+    public Graph mygraph;
     private Node(){}
     int mykey;
     public Node(Graph g) {

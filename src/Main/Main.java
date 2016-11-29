@@ -141,8 +141,25 @@ public class Main{
 		Canon.BasicBlocks b = new Canon.BasicBlocks(stms);
 		//基本块被顺序放置,所有的 CJUMP 都跟有 false 标号
 		Tree.StmList traced = (new Canon.TraceSchedule(b)).stms;//////
-		//生成汇编代码
+		
 		Assem.InstrList instrs = f.frame.codegen(traced.head);
+		Assem.InstrList p1 = instrs;
+		Tree.StmList m1 = traced.tail;
+		//traced.head = traced.tail.head;
+		for(Tree.Stm i = m1.head; i!=null; i = m1.head){
+			//生成汇编代码
+			p1.tail = f.frame.codegen(i);
+			if(p1.tail != null){
+				p1 = p1.tail;
+			}
+			if(m1.tail != null){
+				m1 = m1.tail;
+			}else{
+				break;
+			}
+			//m1 = m1.tail;
+			//instrs = f.frame.procEntryExit2(instrs);
+		}
 		instrs = f.frame.procEntryExit2(instrs);
 		//寄存器分配
 		//这一步具体 3 步见 9.6

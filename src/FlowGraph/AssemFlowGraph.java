@@ -6,7 +6,7 @@ import Temp.*;
 import Assem.*;
 
 public class AssemFlowGraph extends FlowGraph {
-	java.util.Dictionary represent;
+	java.util.Dictionary represent = new java.util.Hashtable();
 	
 	//根据汇编指令创建流图
 	public AssemFlowGraph(InstrList instrs) 

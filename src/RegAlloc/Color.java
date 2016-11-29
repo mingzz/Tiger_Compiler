@@ -8,8 +8,8 @@ import Frame.*;
 
 public class Color {
 	NodeList nodeStack;
-	java.util.Dictionary map;
-	java.util.HashSet regs;
+	java.util.Dictionary map = new java.util.Hashtable();;
+	java.util.HashSet regs = new java.util.HashSet();;
 	TempMap init;
 	InterferenceGraph interGraph;
 	Frame f;

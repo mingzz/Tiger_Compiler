@@ -7,12 +7,13 @@ import RegAlloc.*;
 import FlowGraph.*;
 
 public class Liveness extends InterferenceGraph {
-	java.util.Dictionary info;
-	java.util.Dictionary liveMap;
-	java.util.Dictionary tnode;
+	java.util.Dictionary info = new java.util.Hashtable();
+	java.util.Dictionary liveMap = new java.util.Hashtable();
+	java.util.Dictionary tnode = new java.util.Hashtable();
+	//java.util.Dictionary temp = new java.util.Hashtable();
 	MoveList movelist = null;
 	FlowGraph flowGraph;
-	NodeInfo inf = new NodeInfo();
+	//NodeInfo inf = new NodeInfo();
 	
 	//RegAlloc.Liveness 的对外接口,输入流图,进行活性分析,并输出干扰图
 	public Liveness(FlowGraph flowGraph) {
@@ -36,6 +37,7 @@ public class Liveness extends InterferenceGraph {
 			throw new Error("Node "+node.toString()+" not a member of graph.");
 		else 
 			return ((TempNode)node).temp;
+			//return (Temp)temp.get(node);
 	}
 
 	@Override
@@ -58,11 +60,10 @@ public class Liveness extends InterferenceGraph {
 	}
 	
 	void InitNodeInfo(){
-		inf.def = new HashSet();
-		inf.use = new HashSet();
-		inf.in = null;
-		inf.out = null;
-		info.put(inf, flowGraph.nodes().head);
+		for(NodeList node=flowGraph.nodes();node != null; node=node.tail){
+			NodeInfo p = new NodeInfo(node.head);
+			info.put(node.head, p);
+		}
 	}
 	
 	void calculateLiveness() {
@@ -72,6 +73,7 @@ public class Liveness extends InterferenceGraph {
 			for(NodeList node=flowGraph.nodes();node != null; node=node.tail) {
 				//遍历流图所有指令
 				NodeInfo inf = (NodeInfo) info.get(node.head);//更新前的活性信息
+				//inf = (NodeInfo) info.get(node.head);
 				//等式 1
 				Set in1 = new HashSet(inf.out);
 				in1.removeAll(inf.def);
@@ -93,7 +95,10 @@ public class Liveness extends InterferenceGraph {
 			TempList list = null;
 			//得到活性信息中活跃变量的迭代器
 			Iterator i = ((NodeInfo) info.get(node.head)).out.iterator();
-			while (i.hasNext()) list = new TempList((Temp) i.next(), list);
+			while (i.hasNext()) {
+				Temp j = (Temp)i.next();
+				list = new TempList((Temp)j, list);
+			}
 			if (list != null) liveMap.put(node.head, list);
 		}
 	}
