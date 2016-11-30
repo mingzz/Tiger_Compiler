@@ -1,4 +1,6 @@
 package Main;
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
@@ -57,7 +59,11 @@ public class Main{
 	    		System.out.println(".data\n" + ((DataFrag) f).data);
 		    	writer.println(".data\n" + ((DataFrag) f).data);
 	    	}
-	    	
+	    writer.println();
+	    BufferedReader runtime = new BufferedReader(new FileReader("runtime.s"));
+		while (runtime.ready())
+			writer.println(runtime.readLine());
+		System.out.println("Compile Success!");	
 	    writer.close();
 		/*
 		String filename = argv[0];
