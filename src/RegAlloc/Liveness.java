@@ -10,6 +10,7 @@ public class Liveness extends InterferenceGraph {
 	java.util.Dictionary info = new java.util.Hashtable();
 	java.util.Dictionary liveMap = new java.util.Hashtable();
 	java.util.Dictionary tnode = new java.util.Hashtable();
+	java.util.Dictionary temp = new java.util.Hashtable();
 	//java.util.Dictionary temp = new java.util.Hashtable();
 	MoveList movelist = null;
 	FlowGraph flowGraph;
@@ -33,11 +34,13 @@ public class Liveness extends InterferenceGraph {
 
 	@Override
 	public Temp gtemp(Node node) {
+		//return (Temp)temp.get(node);
+		
 		if (!(node instanceof TempNode))
 			throw new Error("Node "+node.toString()+" not a member of graph.");
 		else 
 			return ((TempNode)node).temp;
-			//return (Temp)temp.get(node);
+			
 	}
 
 	@Override

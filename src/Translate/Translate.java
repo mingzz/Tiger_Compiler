@@ -76,8 +76,8 @@ public class Translate {
 	// f & g
 	public Exp transStringRelExp(Level currentL, int oper, Exp left, Exp right)
 	{
-		Tree.Exp comp = currentL.frame.externCall("stringEqual", new ExpList(left.unEx(), new ExpList(right.unEx(), null)));
-		return new RelCx(oper, new Ex(comp), new Ex( new CONST(1)));
+		Tree.Exp comp = currentL.frame.externCall("_strcmp", new ExpList(left.unEx(), new ExpList(right.unEx(), null)));
+		return new RelCx(oper, new Ex(comp), new Ex( new CONST(0)));
 	}
 	
 	
@@ -141,7 +141,7 @@ public class Translate {
 	public Exp transRecordExp(Level currentL, java.util.ArrayList<Exp> field) 
 	{
 		Temp.Temp addr = new Temp.Temp();
-		Tree.Exp rec_id = currentL.frame.externCall("allocRecord", new ExpList(new CONST((field.size() == 0 ? 1 : field.size()) * Library.WORDSIZE), null));
+		Tree.Exp rec_id = currentL.frame.externCall("_allocRecord", new ExpList(new CONST((field.size() == 0 ? 1 : field.size()) * Library.WORDSIZE), null));
 		
 		Stm stm = transNoExp().unNx();
 		for (int i = field.size() - 1; i >= 0; --i)
@@ -156,7 +156,7 @@ public class Translate {
 	//n 
 	public Exp transArrayExp(Level currentL, Exp init, Exp size)
 	{
-		Tree.Exp alloc = currentL.frame.externCall("initArray", new ExpList(size.unEx(), new ExpList(init.unEx(), null)));
+		Tree.Exp alloc = currentL.frame.externCall("_initArray", new ExpList(size.unEx(), new ExpList(init.unEx(), null)));
 		return new Ex(alloc);
 	}
 	

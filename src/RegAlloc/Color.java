@@ -8,19 +8,21 @@ import Frame.*;
 
 public class Color {
 	NodeList nodeStack;
-	java.util.Dictionary map = new java.util.Hashtable();;
-	java.util.HashSet regs = new java.util.HashSet();;
-	TempMap init;
+	java.util.Dictionary map = new java.util.Hashtable();
+	java.util.HashSet regs = new java.util.HashSet();
+	TempMap init = new DefaultMap();
 	InterferenceGraph interGraph;
 	Frame f;
 	java.util.HashSet ret;
 	
 	Stack stack = new Stack();
 	
-	public Color(InterferenceGraph interGraph, Frame f, java.util.HashSet ret){
+	public Color(InterferenceGraph interGraph, Frame f, java.util.HashSet regs){
 		this.interGraph = interGraph;
 		this.f = f;
-		this.ret = ret;
+		//this.map = interGraph.tmpMap
+		this.regs = regs;
+		color();
 	}
 	
 	void color() {
@@ -31,7 +33,7 @@ public class Color {
 			//得到结点所对应的临时变量 temp
 			Temp temp = interGraph.gtemp(node.head);
 			//如果 temp 已经被分配了寄存器
-			if (init.tempMap(temp) != null) {
+			if (f.tempMap(temp) != null) {
 				--number;
 				stack.push(node.head); //将改结点压入堆栈
 				map.put(temp, temp); //放入分配列表 map 中，它们的寄存器就是本身了
@@ -46,7 +48,7 @@ public class Color {
 			int max = -1;
 			//再次遍历每个临时变量结点
 			for (NodeList n = interGraph.nodes(); n != null; n = n.tail)
-				if (init.tempMap(interGraph.gtemp(n.head)) == null
+				if (f.tempMap(interGraph.gtemp(n.head)) == null
 						&& !isInStack(n.head))
 				{ //没有被分配寄存器且不在堆栈中
 					int num = n.head.outDegree(); //出度
@@ -79,6 +81,7 @@ public class Color {
 		Temp reg = (Temp) available.iterator().next();
 		//加入寄存器分配表
 		map.put(interGraph.gtemp(node), reg);
+		interGraph.gtemp(node).num = reg.num;// 这里也可以改成 创见TempMap类型的init，然后implement TempMap, 把implement 返回，让main得RegAlloc调用
 		}
 	}
 	

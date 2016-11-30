@@ -14,14 +14,16 @@ import Assem.InstrList;
 import Assem.OPER;
 
 public class MipsFrame extends Frame {
+	
 	public int allocDown = 0;
 	public TempList argRegs = new TempList(new Temp(5), new TempList(new Temp(6), new TempList(new Temp(7), new TempList(new Temp(8), null))));
+	//public TempList argRegs = new TempList(a0, new TempList(a1, new TempList(a2, new TempList(a3, null))));
 	public java.util.ArrayList saveArgs = new java.util.ArrayList();
-	static Temp fp = new Temp(0);
-	static Temp sp = new Temp(1);
-	static Temp ra = new Temp(2);
-	static Temp rv = new Temp(3);
-	static Temp zero = new Temp(4);
+	public static Temp fp = new Temp(0);
+	public static Temp sp = new Temp(1);
+	public static Temp ra = new Temp(2);
+	public static Temp rv = new Temp(3);
+	public static Temp zero = new Temp(4);
 	private TempList calleeSaves = null;
 	private TempList callerSaves = null; 
 	private int numOfcalleeSaves = 8;

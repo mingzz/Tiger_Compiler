@@ -1,5 +1,7 @@
 package Main;
+import java.io.IOException;
 import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.util.Scanner;
 import Absyn.*;
 import Frag.*;
@@ -41,12 +43,22 @@ public class Main{
 	    Semant semant = new Semant(translator, errorMsg);
 	    Frag frags = semant.transProg(absyn);
 	    
-	    System.out.println(".global main");
+	    PrintWriter writer = new PrintWriter("ttt.s", "UTF-8");
+	    System.out.println("	.globl main");
+	    System.out.println(".text");
+	    writer.println("	.globl main");
+	   
 	    for (Frag f = frags; f != null; f = f.next)
-	    	if (f instanceof ProcFrag)
-	    	emitProc((ProcFrag) f);
-	    	else if (f instanceof DataFrag)
-	    	System.out.println(".data\n" + ((DataFrag) f).data);
+	    	if (f instanceof ProcFrag){
+	    		emitProc((ProcFrag) f, writer);
+	    		writer.println(".text");
+	    	}
+	    	else if (f instanceof DataFrag){
+	    		System.out.println(".data\n" + ((DataFrag) f).data);
+		    	writer.println(".data\n" + ((DataFrag) f).data);
+	    	}
+	    	
+	    writer.close();
 		/*
 		String filename = argv[0];
 		ErrorMsg.ErrorMsg errorMsg = new ErrorMsg.ErrorMsg(filename);  
@@ -128,7 +140,7 @@ public class Main{
 	}
 	
 	//根据函数段输出该函数段的 IR 树和汇编指令
-	static void emitProc(ProcFrag f) {
+	static void emitProc(ProcFrag f, PrintWriter writer) throws IOException {
 		java.io.PrintStream irOut = new java.io.PrintStream(System.out);
 		//输出 IR 树
 		Tree.Print print = new Tree.Print(irOut);
@@ -173,9 +185,10 @@ public class Main{
 		//添加函数调用和返回的代码
 		instrs = f.frame.procEntryExit3(instrs);
 		Temp.TempMap tempmap = new Temp.CombineMap(f.frame, regAlloc);
-		//输出 Mips 指令
-		System.out.println(".text");
-		for (Assem.InstrList p = instrs; p != null; p = p.tail)
-		System.out.println(p.head.format(tempmap));
+		for (Assem.InstrList p = instrs; p != null; p = p.tail){
+			System.out.println(p.head.format(tempmap));
+			writer.println(p.head.format(tempmap));
+		}
+		
 	}
 }
