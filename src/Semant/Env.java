@@ -38,7 +38,7 @@ public class Env {
 		Type result = null;		//返回值类型
 		Level level = null;		//层
 		
-		// 每个函数少两行 put, set
+		// 每个函数少1行 , set
 		// print(s:string)
 		sym = Symbol.symbol("print");
 		formals = new RECORD(Symbol.symbol("s"), STRING._string,null);
